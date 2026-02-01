@@ -10,13 +10,13 @@ public class Bike {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "model")
+    @Column(name = "model", nullable = false, length = 50)
     private String model;
 
     @Column(name = "loanable")
     private boolean loanable;
 
-@Column()
+@Column(length = 20)
     private String gears;
 
 protected Bike() {}

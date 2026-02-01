@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 //spara, hämta och söka data
 //Hur kan jag söka i databasen? Select from, villkor på vad som ska vara uppfyllt Where
@@ -37,6 +38,23 @@ public class MemberRepository implements MemberRepositoryInterface {
                 tx.commit();
             }
         }
+
+    @Override
+    public List<Member> getAllMembers() {
+        //hämta medlemmar från databasen
+        try (Session session = sessionFactory.openSession()) {
+            String sql = "SELECT * FROM member";
+            {
+                try {
+                    return session.createNativeQuery(sql, Member.class).getResultList();
+
+                } catch (Exception ex) {
+                    throw ex;
+                }
+            }
+
+        }
+    }
 //    public Member searchMemberList(String searchedMember){
 //        for(Member member: memberRegistry.getMembers()){
 //            if(member.getName().contains(searchedMember)){

@@ -10,16 +10,16 @@ public class Car {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column()
+    @Column(nullable = false, length = 40)
     private String brand;
 
-    @Column()
+    @Column(nullable = false, length = 40)
     private String model;
 
-    @Column()
+    @Column(length = 30)
     private String gearbox;
 
-    @Column()
+    @Column(nullable = false)
     private Boolean loanable;
 
     protected Car() {}

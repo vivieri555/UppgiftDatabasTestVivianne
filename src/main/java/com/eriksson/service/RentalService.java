@@ -1,15 +1,19 @@
 package com.eriksson.service;
 
 import com.eriksson.entity.Car;
+import com.eriksson.entity.Member;
 import com.eriksson.entity.Rental;
 import com.eriksson.enums.RentalType;
 import com.eriksson.exception.DoubleBookingException;
 import com.eriksson.exception.InvalidDateException;
 import com.eriksson.exception.MemberNotFoundException;
 import com.eriksson.exception.RentalDaysException;
+import com.eriksson.repo.CarRepositoryInterface;
 import com.eriksson.repo.RentalRepository;
 import com.eriksson.repo.RentalRepositoryInterface;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.Objects;
 
 import static com.eriksson.enums.RentalType.CAR;
@@ -17,9 +21,32 @@ import static com.eriksson.enums.RentalType.CAR;
 public class RentalService {
 
     private final RentalRepositoryInterface rentalRepository;
+    private final CarRepositoryInterface carRepository;
 
-    public RentalService(RentalRepositoryInterface rentalRepository) { this.rentalRepository = rentalRepository;}
 
+    public RentalService(RentalRepositoryInterface rentalRepository, CarRepositoryInterface carRepository)
+    { this.rentalRepository = rentalRepository;
+     this.carRepository = carRepository; }
+
+    public void createCar(String brand, String model, String gearbox, Boolean loanable) {
+        if (brand == null || brand.isBlank()) {
+            throw new IllegalArgumentException ("fyll i namn");
+        }
+        if(model == null || model.isBlank()) {
+            throw new IllegalArgumentException ("fyll i email");
+        }
+        if (loanable == null) {
+            throw new IllegalArgumentException ("fyll i loanable");
+        }
+        Car car = new Car(brand.trim(), model.trim(), gearbox.trim(), loanable);
+        carRepository.save(car);
+    }
+    public void addRental (Rental rental) {
+    //rentals.add(rental);
+    //rental.setRental(this);
+    }
+
+/*
     public void sum(Label sumLabel, Label sumsLabel){
         double sum = 0;
         for(Rental cost: rentals){
@@ -36,7 +63,6 @@ public class RentalService {
         }
         return null;
     }
-    @Override
     public int cost(int days) {
         return 1000 * days;
     }
@@ -61,7 +87,6 @@ public class RentalService {
             rentals.remove(rental);
         }
     }
-    @Override
     public double getDiscountedCost(Rental rental, Label discountLabel) {
         double discountedCost = 0;
         if (rental.member.getStatus().equalsIgnoreCase("Premium")) {
@@ -87,7 +112,6 @@ public class RentalService {
                             Label search, Label discountLabel, TextField historyText, Label saved) {
         Rental rental = new Rental();
         rental.setMember(searchedNamed);
-        booking.clear();
 
         booking.getText();
         if (vehicle == null || !vehicle.isLoanable()) {
@@ -111,8 +135,9 @@ public class RentalService {
             saved.setText("Bokning sparad");
         }
     }
-    public Rental rentCar(RentalType rentalType, Rental rental, long rentalObjectId, int rentalDays, double cost) {
-        //Car car = new Car();
+    public Rental rentCar(RentalType rentalType, long rentalObjectId, int rentalDays, double cost,
+                          String rentalDate) {
+
         Objects.requireNonNull("Rental får inte vara tomt");
         if (CAR == null && Car.isLoanable() == false) {
             throw new DoubleBookingException("Bilen går inte att låna");
@@ -126,12 +151,14 @@ public class RentalService {
         if (rentalDays <= 0) {
             throw new RentalDaysException("Hyrdagar får inte vara 0");
         }
-        if (rentalDate == Ogiltig) {
-            throw new InvalidDateException("Ogiltigt datum");
-        }
+        try {LocalDate.parse(rentalDate);} catch (Exception e){
+            throw new InvalidDateException("Ogiltigt datum");}
+
         if (member.getId() == null) {
             throw new MemberNotFoundException("Hittar inte medlem");
         }
+        Rental rental = new Rental(0, rentalDays, cost, rentalType);
+        rentalRepository.save(rental);
         return rental;
-    }
+    } */
 }

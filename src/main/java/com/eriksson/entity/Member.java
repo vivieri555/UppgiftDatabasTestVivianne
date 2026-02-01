@@ -17,13 +17,13 @@ public class Member {
     @Column(name = "firstName", nullable = false, length = 25)
     private String firstName;
 
-    @Column(name = "lastName")
+    @Column(name = "lastName", nullable = false, length = 25)
     private String lastName;
 
     @Column(nullable = false, unique = true, length = 50)
     private String email;
 
-    @Column(name = "status")
+    @Column(name = "status", length = 15)
     private String status;
 
     @Column(name = "history")

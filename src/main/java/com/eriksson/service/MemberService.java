@@ -4,6 +4,8 @@ import com.eriksson.entity.Member;
 import com.eriksson.repo.MemberRepository;
 import com.eriksson.repo.MemberRepositoryInterface;
 
+import java.util.List;
+
 public class MemberService {
     private final MemberRepositoryInterface memberRepository;
 
@@ -12,7 +14,7 @@ public class MemberService {
     //Skapa o spara ny medlem, validerar, Mer avancerad validering (t.ex. email-format)
     //         * skulle också höra hemma här.
 
-    public Member createMember(String firstName, String lastName, String email, String status, String history) {
+    public void createMember(String firstName, String lastName, String email, String status, String history) {
         if (firstName == null || firstName.isBlank()) {
             throw new IllegalArgumentException ("fyll i namn");
         }
@@ -22,6 +24,9 @@ public class MemberService {
 
         Member member = new Member(firstName.trim(), lastName.trim(), email.trim(),  status.trim(), history.trim());
         memberRepository.save(member);
-        return member;
+    }
+
+    public List<Member> getAllMembers() {
+        return memberRepository.getAllMembers();
     }
 }

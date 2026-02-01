@@ -11,7 +11,7 @@ public class Caravan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column()
+    @Column(nullable = false, length = 50)
     private String model;
 
     @Column()
