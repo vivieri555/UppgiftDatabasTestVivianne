@@ -1,9 +1,12 @@
 package com.eriksson.repo;
 
 import com.eriksson.entity.Rental;
+import jakarta.persistence.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+
+import java.util.List;
 
 public class RentalRepository implements RentalRepositoryInterface {
     private final SessionFactory sessionFactory;
@@ -26,6 +29,25 @@ public class RentalRepository implements RentalRepositoryInterface {
                 session.persist(dbRental);
                 tx.commit();
             }
+        }
+    }
+
+    @Override
+    public List<Rental> getAllRentals() {
+        try (Session session = sessionFactory.openSession()) {
+            String sql = "SELECT Rental.id, Rental.rentalType FROM Rental";
+            Query query = session.createQuery(sql);
+            List<Rental> rentals;
+             {
+                try {
+                   var tx = session.createNativeQuery(sql, Rental.class);
+                   rentals = tx.getResultList();
+                }
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            return rentals;
         }
     }
 }

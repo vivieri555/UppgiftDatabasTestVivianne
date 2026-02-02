@@ -9,4 +9,5 @@ public interface MemberRepositoryInterface {
     void delete(Member member);
 
     List<Member> getAllMembers();
+    String searchEmail(Member member);
 }

@@ -37,6 +37,9 @@ public class Main {
             System.out.println("För att skapa ny cykel tryck 3");
             System.out.println("För att skapa ny husvagn tryck 4");
             System.out.println("För att skapa ny bokning tryck 5");
+            System.out.println("För att avsluta uthyrning tryck 6");
+            System.out.println("Tryck 7 för se samlade intäkter");
+            System.out.println("8 lista rentals");
             System.out.println("Avsluta tryck 9");
             int answer = 0;
             try {
@@ -81,6 +84,7 @@ public class Main {
                     String bikeModel = input.nextLine();
                     System.out.println("Lånbar true annars skriv false:");
                     Boolean bikeLoanable = input.nextBoolean();
+                    input.nextLine();
                     System.out.println("Hur många växlar har cykeln:");
                     String bikeGears = input.nextLine();
                     rentalService.createBike(bikeModel, bikeLoanable, bikeGears);
@@ -91,6 +95,7 @@ public class Main {
                     String caravanModel = input.nextLine();
                     System.out.println("Är husvagnen lånbar true eller false:");
                     Boolean caravanLoanable = input.nextBoolean();
+                    input.nextLine();
                     System.out.println("Är husvagnen Dubbalaxlad eller Enkelaxlad:");
                     String caravanAxles = input.nextLine();
                     rentalService.createCaravan(caravanModel, caravanLoanable, caravanAxles);
@@ -103,6 +108,9 @@ public class Main {
                     }
                     System.out.println("Ange id på medlem:");
                     int id = input.nextInt();
+                    break;
+                case 8:
+                    rentalRepo.getAllRentals().forEach(System.out::println);
                     break;
                 case 9:
                     System.out.println("Uthyrningsprogrammet avslutas nu..\nVälkommen åter!");

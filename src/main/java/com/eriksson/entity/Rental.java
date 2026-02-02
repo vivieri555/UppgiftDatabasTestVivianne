@@ -3,6 +3,9 @@ package com.eriksson.entity;
 import com.eriksson.enums.RentalType;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "rental")
 public class Rental {
@@ -31,6 +34,12 @@ public class Rental {
             foreignKey = @ForeignKey(name = "fk_rental_member")
     )
     private Member member;
+
+//    List<Rental> rentals = new ArrayList<>();
+//
+//    public void addRental(Rental rental) {
+//        rentals.add(rental);
+//    }
 
 protected Rental() {}
 

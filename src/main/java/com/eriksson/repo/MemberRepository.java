@@ -4,7 +4,6 @@ import com.eriksson.entity.Member;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.dialect.Database;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,7 +33,7 @@ public class MemberRepository implements MemberRepositoryInterface {
     public void delete(Member member) {
             try (Session session = sessionFactory.openSession()) {
                 Transaction tx = session.beginTransaction();
-                session.delete(member);
+                session.remove(member);
                 tx.commit();
             }
         }
@@ -64,18 +63,18 @@ public class MemberRepository implements MemberRepositoryInterface {
 //    }
 
 
-    public Member searchM (Member member) {
-        try (Session session = sessionFactory.openSession()) {
-            String sql = """
+    @Override
+    public String searchEmail (Member member) {
+        String sql = """
                     SELECT *
                     FROM member
-                    WHERE member_id = ?
+                    WHERE member_email = ?
                     """;
-
-            String count = (String) session.createNativeQuery(sql)
-                    .setParameter(1, member.getId())
+        try (Session session = sessionFactory.openSession()) {
+            String r = (String) session.createNativeQuery(sql)
+                    .setParameter(1, member.getEmail())
                     .getSingleResult();
-            return member;
+            return r;
         }
     }
 /*
