@@ -17,15 +17,21 @@ public class Caravan {
     @Column()
     private Boolean loanable;
 
+    @Column(length = 30)
+    private String axles;
+
     protected Caravan() {}
 
-    public Caravan(String model, Boolean loanable) {
+    public Caravan(String model, Boolean loanable, String axles) {
         this.model = model;
         this.loanable = loanable;
+        this.axles = axles;
     }
     public Long getId() { return id; }
 
     public String getModel() { return model; }
 
     public Boolean getLoanable() { return loanable; }
+
+    public String getAxles() { return axles;}
 }

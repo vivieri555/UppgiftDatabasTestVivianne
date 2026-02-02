@@ -19,10 +19,12 @@ public class Main {
         MemberRepositoryInterface memberRepo = new MemberRepository(sessionFactory);
         RentalRepositoryInterface rentalRepo = new RentalRepository(sessionFactory);
         CarRepositoryInterface carRepo = new CarRepository(sessionFactory);
+        BikeRepositoryInterface bikeRepo = new BikeRepository(sessionFactory);
+        CaravanRepositoryInterface caravanRepo = new CaravanRepository(sessionFactory);
 
         //Service
         MemberService memberService = new MemberService(memberRepo);
-        RentalService rentalService = new RentalService(rentalRepo, carRepo);
+        RentalService rentalService = new RentalService(rentalRepo, carRepo, bikeRepo, caravanRepo);
 
         Scanner input = new Scanner(System.in);
 
@@ -60,6 +62,7 @@ public class Main {
                     memberService.createMember(firstName, lastName, email, status, history);
                     break;
                 case 2:
+                    input.nextLine();
                     System.out.println("Skriv in uppgifter för att spara ny bil");
                     System.out.println("Skriv in varumärke:");
                     String carBrand = input.nextLine();
@@ -72,13 +75,38 @@ public class Main {
                     rentalService.createCar(carBrand, carModel, carGearbox, carLoanable);
                     //Spara in bilen
                     break;
+                case 3:
+                    input.nextLine();
+                    System.out.println("Vad har cykeln för modell:");
+                    String bikeModel = input.nextLine();
+                    System.out.println("Lånbar true annars skriv false:");
+                    Boolean bikeLoanable = input.nextBoolean();
+                    System.out.println("Hur många växlar har cykeln:");
+                    String bikeGears = input.nextLine();
+                    rentalService.createBike(bikeModel, bikeLoanable, bikeGears);
+                    break;
+                case 4:
+                    input.nextLine();
+                    System.out.println("Fyll i modell på husvagnen:");
+                    String caravanModel = input.nextLine();
+                    System.out.println("Är husvagnen lånbar true eller false:");
+                    Boolean caravanLoanable = input.nextBoolean();
+                    System.out.println("Är husvagnen Dubbalaxlad eller Enkelaxlad:");
+                    String caravanAxles = input.nextLine();
+                    rentalService.createCaravan(caravanModel, caravanLoanable, caravanAxles);
+                    break;
                 case 5:
+                    //Hämta medlemmar
                     for(Member member : memberService.getAllMembers())
                     {
                         System.out.println(member.getFirstName() + ", id: " + member.getId());
                     }
                     System.out.println("Ange id på medlem:");
                     int id = input.nextInt();
+                    break;
+                case 9:
+                    System.out.println("Uthyrningsprogrammet avslutas nu..\nVälkommen åter!");
+                    running = false;
                     break;
                 default:
                     System.out.println("Prova igen att ange ett giltigt menyval.");
