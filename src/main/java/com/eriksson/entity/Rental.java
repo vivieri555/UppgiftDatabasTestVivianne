@@ -3,6 +3,7 @@ package com.eriksson.entity;
 import com.eriksson.enums.RentalType;
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,8 +19,11 @@ public class Rental {
     @Column(nullable = false)
     private long rentalObjectId;
 
-    @Column(name = "rentalDays", nullable = false)
-    private int rentalDays;
+    @Column(name = "rentalDate", nullable = false)
+    private LocalDate rentalDate;
+
+    @Column(nullable = false)
+    private LocalDate returnDate;
 
     @Column(name = "cost", nullable = false)
     private double cost;
@@ -35,17 +39,13 @@ public class Rental {
     )
     private Member member;
 
-//    List<Rental> rentals = new ArrayList<>();
-//
-//    public void addRental(Rental rental) {
-//        rentals.add(rental);
-//    }
 
 protected Rental() {}
 
-    public Rental(long rentalObjectId, int rentalDays, double cost, RentalType rentalType) {
+    public Rental(long rentalObjectId, LocalDate rentalDate, LocalDate returnDate, double cost, RentalType rentalType) {
     this.rentalObjectId = rentalObjectId;
-    this.rentalDays = rentalDays;
+    this.rentalDate = rentalDate;
+    this.returnDate = returnDate;
     this.cost = cost;
     this.rentalType = rentalType;
     }
@@ -66,9 +66,11 @@ protected Rental() {}
         return cost;
     }
 
-    public int getRentalDays() {
-        return rentalDays;
+    public LocalDate getRentalDate() {
+        return rentalDate;
     }
+
+    public LocalDate getReturnDate() { return returnDate;}
 
     public long getRentalObjectId() {
         return rentalObjectId;

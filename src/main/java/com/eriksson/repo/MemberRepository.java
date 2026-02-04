@@ -1,6 +1,8 @@
 package com.eriksson.repo;
 
 import com.eriksson.entity.Member;
+import com.eriksson.exception.MemberNotFoundException;
+import com.eriksson.service.MemberService;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -10,6 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Scanner;
 
 //spara, hämta och söka data
 //Hur kan jag söka i databasen? Select from, villkor på vad som ska vara uppfyllt Where
@@ -30,10 +33,17 @@ public class MemberRepository implements MemberRepositoryInterface {
         }
     }
     // remove medlem
-    public void delete(Member member) {
+    public void delete(Long mem) {
             try (Session session = sessionFactory.openSession()) {
                 Transaction tx = session.beginTransaction();
-                session.remove(member);
+                Member member = session.get(Member.class, mem);
+                if (member == null) {
+                    throw new MemberNotFoundException("Medlemmen hittades inte");
+                }
+                else {
+                    session.remove(member);
+                    System.out.println("Medlemmen är borttagen");
+                }
                 tx.commit();
             }
         }
@@ -54,14 +64,18 @@ public class MemberRepository implements MemberRepositoryInterface {
 
         }
     }
-//    public Member searchMemberList(String searchedMember){
-//        for(Member member: memberRegistry.getMembers()){
-//            if(member.getName().contains(searchedMember)){
-//                return member;
-//            }
-//        } return null;
-//    }
 
+    @Override
+    public Long searchId(Long id) {
+        String sql = """
+                SELECT id FROM member WHERE id = ? """;
+        try (Session session = sessionFactory.openSession()) {
+            Long result = (Long) session.createNativeQuery(sql)
+                .setParameter(1, id)
+                    .getSingleResult();
+            return result;
+        }
+    }
 
     @Override
     public String searchEmail (Member member) {
@@ -77,6 +91,7 @@ public class MemberRepository implements MemberRepositoryInterface {
             return r;
         }
     }
+}
 /*
     public void searchMember(Member member) {
         String sql = """
@@ -130,4 +145,4 @@ ResultSet rs = ps.executeQuery()) {
 SQLException e) {
         throw new RuntimeException(e);
         } */
-                }
+

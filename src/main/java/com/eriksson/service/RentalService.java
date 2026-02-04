@@ -5,21 +5,16 @@ import com.eriksson.enums.RentalType;
 import com.eriksson.exception.DoubleBookingException;
 import com.eriksson.exception.InvalidDateException;
 import com.eriksson.exception.MemberNotFoundException;
-import com.eriksson.exception.RentalDaysException;
-import com.eriksson.repo.BikeRepositoryInterface;
-import com.eriksson.repo.CarRepositoryInterface;
-import com.eriksson.repo.CaravanRepositoryInterface;
-import com.eriksson.repo.RentalRepositoryInterface;
+import com.eriksson.repo.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Scanner;
 
 import static com.eriksson.enums.RentalType.CAR;
-import static com.eriksson.enums.RentalType.BIKE;
-import static com.eriksson.enums.RentalType.CARAVAN;
 
 public class RentalService {
 
@@ -27,13 +22,15 @@ public class RentalService {
     private final CarRepositoryInterface carRepository;
     private final BikeRepositoryInterface bikeRepository;
     private final CaravanRepositoryInterface caravanRepository;
+    private final MemberRepositoryInterface memberRepository;
 
     public RentalService(RentalRepositoryInterface rentalRepository, CarRepositoryInterface carRepository
-            , BikeRepositoryInterface bikeRepository, CaravanRepositoryInterface caravanRepository)
+            , BikeRepositoryInterface bikeRepository, CaravanRepositoryInterface caravanRepository, MemberRepositoryInterface memberRepository)
     { this.rentalRepository = rentalRepository;
         this.carRepository = carRepository;
         this.bikeRepository = bikeRepository;
-        this.caravanRepository = caravanRepository; }
+        this.caravanRepository = caravanRepository;
+    this.memberRepository = memberRepository; }
 
     public void createCar(String brand, String model, String gearbox, Boolean loanable) {
         if (brand == null || brand.isBlank()) {
@@ -65,10 +62,22 @@ public class RentalService {
         Caravan caravan = new Caravan(model.trim(), loanable, axles);
         caravanRepository.save(caravan);
     }
-    public int cost(int days) {
-        return 1000 * days;
+    public BigDecimal cost(int days) {
+        return BigDecimal.valueOf(1000 * days);
     }
     /*
+    public double getDiscountedCost(Rental rental) {
+        double discountedCost = 0;
+        if (rental.getMember().getStatus().equalsIgnoreCase("Premium")) {
+            System.out.println("Medlemmen kan få rabatt 100 kr på varje uthyrning");
+            discountedCost = cost(rental.getRentalDays()) -100;
+        }
+        else{
+            return cost(rental.getRentalDays());
+        }
+        return discountedCost;
+    }
+
     public void sum(){
         double sum = 0;
         for(Rental cost: rentals){
@@ -88,17 +97,7 @@ public class RentalService {
                 }
             } terminate.setText("Avslutar bokningen");
         }
-        public double getDiscountedCost(Rental rental) {
-            double discountedCost = 0;
-            if (rental.getMember().getStatus().equalsIgnoreCase("Premium")) {
-                System.out.println("Medlemmen kan få rabatt 100 kr på varje uthyrning");
-                discountedCost = cost(rental.getRentalDays()) -100;
-            }
-            else{
-                return cost(rental.getRentalDays());
-            }
-            return discountedCost;
-        } */
+        */
     /*
    public String available(){
        String text = "";
@@ -137,25 +136,44 @@ public class RentalService {
            saved.setText("Bokning sparad");
        }
    } */
-    public void renting() {
-        Scanner input = new Scanner(System.in);
-        System.out.println("Skriv in id på medlemmen du önskar göra bokningen på, se id i listan");
-        Long id = input.nextLong();
-        System.out.println("Vilken bil vill du boka?");
-        String car = input.nextLine();
-        System.out.println("Hur många antal dagar vill du boka?");
-        int rentalDays = input.nextInt();
-        int amount = cost(rentalDays);
-//        Double disCost = getDiscountedCost(rental);
-//        rentCar(car, id, rentalDays, amount, )
-//       rental.addRental();
-//        System.out.println("Du har bokat: " + );
-        //Skriva ut kvitto på rental man gjort precis
+    public LocalDate dateFormat(String rentalDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate bookingDate;
+        try {
+            bookingDate = LocalDate.parse(rentalDate, formatter);
+            //bookingDate = localDate.plusDays(rentalDays);
+            System.out.println("Påbörjar uthyrningen datumet " + bookingDate);
+        }
+        catch (Exception e) {
+            throw new InvalidDateException("Ogiltigt uthyrningsdatum, fyll i åååå-mm-dd");
+        }
+        return bookingDate;
     }
-    public Rental rentCar(RentalType rentalType, long rentalObjectId, int rentalDays, double cost,
-                          String rentalDate, Member member) {
+    public LocalDate returnDate(String returnDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate returnD;
+        try {
+            returnD = LocalDate.parse(returnDate, formatter);
+            System.out.println("Återlämningsdatum: " + returnD);
+        } catch (Exception e) {
+            throw new InvalidDateException ("Ogiltigt returdatum, fyll i åååå-mm-dd");
+        }
+        return returnD;
+    }
+    public long dateDiff(LocalDate rentalDate, LocalDate returnDate) {
+       // LocalDate date1 = LocalDate.of(LocalDate.parse(rentalDate));
+       // LocalDate date2 = LocalDate.of(returnDate);
+        //long daysBetween = ChronoUnit.DAYS.between(date1, date2);
+        long daysBetween = rentalDate.until(returnDate, ChronoUnit.DAYS);
+        return daysBetween;
+    }
+    //Anropa repo från RentalService, i repo ska jag hämta en member med en sql query, returnera member hit
+    //hämta från databasen
+    public Rental rentCar(RentalType rentalType, long rentalObjectId,
+                          LocalDate rentalDate, LocalDate returnDate, Long memberId) {
         //hitta rentalobjectId från databasen, kolla om det är false
         Optional<Car> objectId = carRepository.findById(rentalObjectId);
+        Long member = memberRepository.searchId(memberId);
         Objects.requireNonNull("Rental får inte vara tomt");
         if (CAR == null) {
             throw new DoubleBookingException("Bilen går inte att låna");
@@ -166,17 +184,16 @@ public class RentalService {
         if (rentalType == CAR) {
             System.out.println("Boka bil");
         }
-        if (rentalDays <= 0) {
-            throw new RentalDaysException("Hyrdagar får inte vara 0");
-        }
+//        if (rentalDays <= 0) {
+//            throw new RentalDaysException("Hyrdagar får inte vara 0");
+//        }
         try {LocalDate.parse(rentalDate);} catch (Exception e){
             throw new InvalidDateException("Ogiltigt datum");}
 
-        if (member.getId() == null) {
+        if (member == null) {
             throw new MemberNotFoundException("Hittar inte medlem");
         }
-        Rental rental = new Rental(0, rentalDays, cost, rentalType);
-        //rental.addRental(rental);
+        Rental rental = new Rental(0, rentalDate, returnDate, cost, rentalType, member);
         rentalRepository.save(rental);
         return rental;
     }

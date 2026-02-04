@@ -6,6 +6,11 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class RentalRepository implements RentalRepositoryInterface {
@@ -33,24 +38,25 @@ public class RentalRepository implements RentalRepositoryInterface {
     }
 
     @Override
-    public List<Rental> getAllRentals() {
-        try (Session session = sessionFactory.openSession()) {
-            String sql = "SELECT Rental.id, Rental.rentalType FROM Rental";
-            Query query = session.createQuery(sql);
-            List<Rental> rentals;
-             {
-                try {
-                   var tx = session.createNativeQuery(sql, Rental.class);
-                   rentals = tx.getResultList();
-                }
-                catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+    public List<String> getAllRentals() {
+        String sql = "SELECT id, rentalType FROM Rental";
+
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery(sql)) {
+            List<String> rentals = new ArrayList<>();
+            while (rs.next()) {
+                Long id = rs.getLong("id");
+                String name = rs.getString("rentalType");
+                rentals.add("Rental{id=%d, rentalType=%s'}".formatted(id, name));
             }
             return rentals;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
-}
+        }
+
 
 /**
  * Setter för Show.
