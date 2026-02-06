@@ -1,6 +1,6 @@
 package com.eriksson.enums;
 
-public enum RentalType {
+public enum RENTALTYPE {
     BIKE,
     CAR,
     CARAVAN

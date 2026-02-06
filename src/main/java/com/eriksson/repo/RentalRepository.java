@@ -21,19 +21,12 @@ public class RentalRepository implements RentalRepositoryInterface {
     public void save(Rental rental) {
         try (Session session = sessionFactory.openSession()) {
             Transaction tx = session.beginTransaction();
-
-            if (rental.getId() != null) {
-                Long rentalId = rental.getId();
-                Rental dbRental = session.get(Rental.class, rentalId);
-                if (dbRental == null) {
-                    session.save(rental);
-                } else {
-                    //uppdatera dbRental
-
+                if (rental.getId() != null) {
+                    session.merge(rental);
                 }
-                session.persist(dbRental);
-                tx.commit();
-            }
+                else {
+                session.persist(rental);
+                 } tx.commit();
         }
     }
 
@@ -57,16 +50,6 @@ public class RentalRepository implements RentalRepositoryInterface {
     }
         }
 
-
-/**
- * Setter för Show.
- *
- * Används av Show.addBooking(...)
- * för att hålla relationen i synk.
- */
-//public void setShow(Show show) {
-//    this.show = show;
-//}
 
 /**
  * BookingRepositoryImpl

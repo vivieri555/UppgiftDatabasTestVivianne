@@ -1,7 +1,7 @@
 package com.eriksson.service;
 
 import com.eriksson.entity.*;
-import com.eriksson.enums.RentalType;
+import com.eriksson.enums.RENTALTYPE;
 import com.eriksson.exception.DoubleBookingException;
 import com.eriksson.exception.InvalidDateException;
 import com.eriksson.exception.MemberNotFoundException;
@@ -14,7 +14,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.eriksson.enums.RentalType.CAR;
+import static com.eriksson.enums.RENTALTYPE.CAR;
 
 public class RentalService {
 
@@ -169,32 +169,27 @@ public class RentalService {
     }
     //Anropa repo från RentalService, i repo ska jag hämta en member med en sql query, returnera member hit
     //hämta från databasen
-    public Rental rentCar(RentalType rentalType, long rentalObjectId,
-                          LocalDate rentalDate, LocalDate returnDate, Long memberId) {
+    public void rentCar(String car, Long rentalObjectId,
+                          LocalDate rentalDate, LocalDate returnDate, BigDecimal cost, Long memberId) {
         //hitta rentalobjectId från databasen, kolla om det är false
+        //när rental redan är sparad, kolla i rental vad den är kopplad till i db
+        //kolla med sql query vad det är för rentalobjectid på car/bike
+        //behöver bara veta vilken typ och vilket id, så sparar man en rental
         Optional<Car> objectId = carRepository.findById(rentalObjectId);
-        Long member = memberRepository.searchId(memberId);
+        Member member = memberRepository.searchId(memberId);
         Objects.requireNonNull("Rental får inte vara tomt");
         if (CAR == null) {
             throw new DoubleBookingException("Bilen går inte att låna");
         }
-        if(rentalObjectId == 0) {
-            //koppla ihop objektet bil med id
-        }
-        if (rentalType == CAR) {
-            System.out.println("Boka bil");
-        }
-//        if (rentalDays <= 0) {
-//            throw new RentalDaysException("Hyrdagar får inte vara 0");
-//        }
-        try {LocalDate.parse(rentalDate);} catch (Exception e){
-            throw new InvalidDateException("Ogiltigt datum");}
-
-        if (member == null) {
+        if (memberId == null) {
             throw new MemberNotFoundException("Hittar inte medlem");
         }
-        Rental rental = new Rental(0, rentalDate, returnDate, cost, rentalType, member);
-        rentalRepository.save(rental);
-        return rental;
+        RENTALTYPE carA = RENTALTYPE.valueOf(String.valueOf(car));
+
+        if (carA == CAR) {
+            Rental rental = new Rental(rentalObjectId, rentalDate, returnDate, cost, carA, member);
+            rentalRepository.save(rental);
+        }
+        System.out.println("Det är nu bokat");
     }
 }

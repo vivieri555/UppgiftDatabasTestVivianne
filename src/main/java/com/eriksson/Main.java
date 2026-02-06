@@ -1,7 +1,6 @@
 package com.eriksson;
 
 import com.eriksson.entity.Member;
-import com.eriksson.enums.RentalType;
 import com.eriksson.repo.*;
 import com.eriksson.service.MemberService;
 import com.eriksson.service.RentalService;
@@ -36,7 +35,7 @@ public class Main {
         while (running) {
             System.out.println("*************************************************");
             System.out.println("------Välkommen till Vivi's uthyrning!-----------");
-            System.out.println("För att skapa ny kund tryck 1");
+            System.out.println("För att komma till meny för medlemmar tryck 1");
             System.out.println("För att skapa ny bil tryck 2");
             System.out.println("För att skapa ny cykel tryck 3");
             System.out.println("För att skapa ny husvagn tryck 4");
@@ -54,19 +53,7 @@ public class Main {
             }
             switch (answer) {
                 case 1:
-                    input.nextLine();
-                    System.out.println("För att skapa kund, skriv in Förnamn:");
-                    String firstName = input.nextLine();
-                    System.out.println("Skriv in Efternamn: ");
-                    String lastName = input.nextLine();
-                    System.out.println("Skriv in email:");
-                    String email = input.nextLine();
-                    System.out.println("Fyll i status Standard eller Premium:");
-                    String status = input.nextLine();
-                    System.out.println("Fyll i eventuell historik:");
-                    String history = input.nextLine();
-
-                    memberService.createMember(firstName, lastName, email, status, history);
+                   memberService.membersMenu();
                     break;
                 case 2:
                     input.nextLine();
@@ -112,13 +99,13 @@ public class Main {
                     }
                     System.out.println("Skriv in id på medlemmen du önskar göra bokningen på, se id i listan");
                     Long id = input.nextLong();
-                    memberRepo.searchId(id);
 
                     input.nextLine();
-                    System.out.println("Vilken bil vill du boka?");
+                    System.out.println("Vill du boka CAR, BIKE eller CARAVAN?");
                     String car = input.nextLine();
-                    RentalType rentV = RentalType.valueOf(String.valueOf(car));
-
+                    System.out.println("vilket Rentalobject id har fordonet du vill hyra:");
+                    Long objectId = input.nextLong();
+                    input.nextLine();
                     System.out.println("Från vilket datum vill du boka? Ange åååå-mm-dd");
                     String date = input.nextLine();
                     System.out.println("Till vilket datum önskar du boka? Ange åååå-mm-dd");
@@ -129,12 +116,14 @@ public class Main {
 
                     BigDecimal amount = rentalService.cost((int)dateDiff);
                     System.out.println("Kostnaden blir utan rabatt uträknat: " + amount);
+                    rentalService.rentCar(car, objectId, rentalDate, returnDate, amount, id);
+
 //        Double disCost = getDiscountedCost(rental);
 //        rentCar(car, id, rentalDays, amount, )
 //       rental.addRental();
-                    String rent = rentalService.rentCar(rentV, 1,
-                            rentalDays, date, memId);
-       System.out.println("Du har bokat: " );
+                   // String rent = rentalService.rentCar(rentV, 1,
+                   //         rentalDays, date, memId);
+       //System.out.println("Du har bokat: " );
                     //Skriva ut kvitto på rental man gjort precis
                     break;
                 case 8:

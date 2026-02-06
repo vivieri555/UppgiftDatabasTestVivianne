@@ -1,11 +1,11 @@
 package com.eriksson.entity;
 
-import com.eriksson.enums.RentalType;
+import com.eriksson.enums.RENTALTYPE;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Table(name = "rental")
@@ -17,7 +17,7 @@ public class Rental {
     private Long id;
 
     @Column(nullable = false)
-    private long rentalObjectId;
+    private Long rentalObjectId;
 
     @Column(name = "rentalDate", nullable = false)
     private LocalDate rentalDate;
@@ -26,10 +26,10 @@ public class Rental {
     private LocalDate returnDate;
 
     @Column(name = "cost", nullable = false)
-    private double cost;
+    private BigDecimal cost;
 
     @Column(nullable = false)
-    private RentalType rentalType;
+    private RENTALTYPE rentalType;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(
@@ -42,12 +42,13 @@ public class Rental {
 
 protected Rental() {}
 
-    public Rental(long rentalObjectId, LocalDate rentalDate, LocalDate returnDate, double cost, RentalType rentalType) {
+    public Rental(Long rentalObjectId, LocalDate rentalDate, LocalDate returnDate, BigDecimal cost, RENTALTYPE rentalType, Member member) {
     this.rentalObjectId = rentalObjectId;
     this.rentalDate = rentalDate;
     this.returnDate = returnDate;
     this.cost = cost;
     this.rentalType = rentalType;
+    this.member = member;
     }
 
     public Long getId() {
@@ -58,11 +59,11 @@ protected Rental() {}
         return member;
     }
 
-    public RentalType getRentalType() {
+    public RENTALTYPE getRentalType() {
         return rentalType;
     }
 
-    public double getCost() {
+    public BigDecimal getCost() {
         return cost;
     }
 

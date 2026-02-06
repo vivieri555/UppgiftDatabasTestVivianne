@@ -3,6 +3,7 @@ package com.eriksson.repo;
 import com.eriksson.entity.Member;
 import com.eriksson.exception.MemberNotFoundException;
 import com.eriksson.service.MemberService;
+import com.eriksson.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -12,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 //spara, hämta och söka data
@@ -66,11 +68,11 @@ public class MemberRepository implements MemberRepositoryInterface {
     }
 
     @Override
-    public Long searchId(Long id) {
+    public Member searchId(Long id) {
         String sql = """
                 SELECT id FROM member WHERE id = ? """;
         try (Session session = sessionFactory.openSession()) {
-            Long result = (Long) session.createNativeQuery(sql)
+            Member result = (Member) session.createNativeQuery(sql)
                 .setParameter(1, id)
                     .getSingleResult();
             return result;
@@ -78,53 +80,16 @@ public class MemberRepository implements MemberRepositoryInterface {
     }
 
     @Override
-    public String searchEmail (Member member) {
-        String sql = """
-                    SELECT *
-                    FROM member
-                    WHERE member_email = ?
-                    """;
-        try (Session session = sessionFactory.openSession()) {
-            String r = (String) session.createNativeQuery(sql)
-                    .setParameter(1, member.getEmail())
-                    .getSingleResult();
-            return r;
+    public Optional<Member> searchEmail(String email) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("from Member c where c.email = :email", Member.class)
+                    .setParameter("email", email)
+                    .uniqueResultOptional();
         }
     }
 }
 /*
-    public void searchMember(Member member) {
-        String sql = """
-                    SELECT *
-                    FROM member
-                    WHERE member_id = ?
-                    """;
-        try (Connection connection = Database.getConnection();
-        PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setLong(1, member_id);
-            try (ResultSet rs = ps.executeQuery()) {
-                while(rs.next()) {
-                    String name = rs.getString("pingla_name");
-                }
-            }
-        }
 
-        try (Session session  = sessionFactory.openSession()
-        PreparedStatement ps = connection) {
-            ps.setString(1, id);
-            try (PreparedStatement ps = session.prepareStatement(sql)) {
-
-
-            Number count = (Number) session.createNativeQuery(sql)
-                    .setParameter("memberId", memberId)
-                    .getSingleResult();
-            return count.longValue() > 0;
-        }
-    }
-}
-
-// getSingleResult returnerar ett Number (dialekt-beroende)
-// Om count > 0 finns minst en bokning
 String sql = "SELECT id, name, email FROM customer WHERE email = ?";
 
         try (
