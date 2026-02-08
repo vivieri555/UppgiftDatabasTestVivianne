@@ -1,6 +1,7 @@
 package com.eriksson;
 
 import com.eriksson.entity.Member;
+import com.eriksson.entity.Rental;
 import com.eriksson.repo.*;
 import com.eriksson.service.MemberService;
 import com.eriksson.service.RentalService;
@@ -31,7 +32,7 @@ public class Main {
 
         Scanner input = new Scanner(System.in);
 
-        Boolean running = true;
+        boolean running = true;
         while (running) {
             System.out.println("*************************************************");
             System.out.println("------Välkommen till Vivi's uthyrning!-----------");
@@ -103,31 +104,29 @@ public class Main {
                     input.nextLine();
                     System.out.println("Vill du boka CAR, BIKE eller CARAVAN?");
                     String car = input.nextLine();
-                    System.out.println("vilket Rentalobject id har fordonet du vill hyra:");
+                    System.out.println("Vilket Rentalobject id har fordonet du vill hyra:");
                     Long objectId = input.nextLong();
                     input.nextLine();
                     System.out.println("Från vilket datum vill du boka? Ange åååå-mm-dd");
                     String date = input.nextLine();
                     System.out.println("Till vilket datum önskar du boka? Ange åååå-mm-dd");
                     String returnD = input.nextLine();
-                    LocalDate rentalDate = rentalService.dateFormat(date);
+                    LocalDate rentalDate = rentalService.rentalDate(date);
                     LocalDate returnDate = rentalService.returnDate(returnD);
                     long dateDiff = rentalService.dateDiff(rentalDate, returnDate);
+                    Member member = memberRepo.searchId((id));
+                    BigDecimal amount = rentalService.cost(member, (int)dateDiff);
+                    System.out.println("Kostnaden blir uträknat: " + amount);
 
-                    BigDecimal amount = rentalService.cost((int)dateDiff);
-                    System.out.println("Kostnaden blir utan rabatt uträknat: " + amount);
-                    rentalService.rentCar(car, objectId, rentalDate, returnDate, amount, id);
+                    rentalService.rentCar(car, objectId, rentalDate, returnDate, amount, member);
 
-//        Double disCost = getDiscountedCost(rental);
-//        rentCar(car, id, rentalDays, amount, )
-//       rental.addRental();
-                   // String rent = rentalService.rentCar(rentV, 1,
-                   //         rentalDays, date, memId);
-       //System.out.println("Du har bokat: " );
-                    //Skriva ut kvitto på rental man gjort precis
+                case 6:
+                    rentalService.terminateRental();
                     break;
                 case 8:
-                    rentalRepo.getAllRentals();
+                    for(Object rental: rentalRepo.getAllRentals()) {
+                        System.out.println(rental.toString());
+                    }
                     break;
                 case 9:
                     System.out.println("Uthyrningsprogrammet avslutas nu..\nVälkommen åter!");

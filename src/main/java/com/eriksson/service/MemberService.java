@@ -15,8 +15,6 @@ public class MemberService {
 
     public MemberService(MemberRepositoryInterface memberRepository) { this.memberRepository = memberRepository;}
 
-    //Skapa o spara ny medlem, validerar, Mer avancerad validering (t.ex. email-format)
-    //         * skulle också höra hemma här.
 
     public void createMember(String firstName, String lastName, String email, String status, String history) {
         if (firstName == null || firstName.isBlank()) {
@@ -74,6 +72,7 @@ public class MemberService {
                 break;
             case 2:
                 //Ändra på medlem Update
+              //  memberRepository.updateName();
                 break;
             case 3:
                 for(Member member : getAllMembers())

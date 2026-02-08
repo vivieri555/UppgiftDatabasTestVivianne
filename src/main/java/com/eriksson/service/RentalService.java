@@ -4,6 +4,7 @@ import com.eriksson.entity.*;
 import com.eriksson.enums.RENTALTYPE;
 import com.eriksson.exception.DoubleBookingException;
 import com.eriksson.exception.InvalidDateException;
+import com.eriksson.exception.InvalidIdException;
 import com.eriksson.exception.MemberNotFoundException;
 import com.eriksson.repo.*;
 
@@ -13,8 +14,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Scanner;
 
-import static com.eriksson.enums.RENTALTYPE.CAR;
+import static com.eriksson.enums.RENTALTYPE.*;
+import static java.lang.Integer.parseInt;
 
 public class RentalService {
 
@@ -31,6 +34,8 @@ public class RentalService {
         this.bikeRepository = bikeRepository;
         this.caravanRepository = caravanRepository;
     this.memberRepository = memberRepository; }
+
+    Scanner input = new Scanner(System.in);
 
     public void createCar(String brand, String model, String gearbox, Boolean loanable) {
         if (brand == null || brand.isBlank()) {
@@ -62,86 +67,42 @@ public class RentalService {
         Caravan caravan = new Caravan(model.trim(), loanable, axles);
         caravanRepository.save(caravan);
     }
-    public BigDecimal cost(int days) {
-        return BigDecimal.valueOf(1000 * days);
-    }
-    /*
-    public double getDiscountedCost(Rental rental) {
-        double discountedCost = 0;
-        if (rental.getMember().getStatus().equalsIgnoreCase("Premium")) {
+    public BigDecimal cost(Member member, int days) {
+        if (member.getStatus().equalsIgnoreCase("Premium")) {
             System.out.println("Medlemmen kan få rabatt 100 kr på varje uthyrning");
-            discountedCost = cost(rental.getRentalDays()) -100;
+            return BigDecimal.valueOf(1050.50 * days - 100.50);
         }
-        else{
-            return cost(rental.getRentalDays());
+        else {
+            return BigDecimal.valueOf(1050.50 * days);
         }
-        return discountedCost;
     }
 
-    public void sum(){
-        double sum = 0;
-        for(Rental cost: rentals){
-            System.out.println("Intäkter: " + cost.getCost());
-            sum = sum + cost.getCost();
-        } System.out.println("Summan av intäkterna: " + sum + " kr");
-    }
+//    public void sum(){
+//        double sum = 0;
+//        for(Rental cost: rentals){
+//            System.out.println("Intäkter: " + cost.getCost());
+//            sum = sum + cost.getCost();
+//        } System.out.println("Summan av intäkterna: " + sum + " kr");
+//    }
 
 
-        public void terminateRental(String name, Label termLabel, Label terminate){
-            for(Rental rental: rentals){
-                if(rental.getMember().getName().equals(name)){
-                    termLabel.setText("Avslutar bokning på " + rental.getMember().getName());
-                    System.out.println("Avslutar bokning på " + rental.getMember().getName());
-                    rental.getVehicle().setLoanable(true);
-                    delete(rental);
-                }
-            } terminate.setText("Avslutar bokningen");
+        public void terminateRental() {
+            System.out.println("Vilket uthyrnings-id har den du vill avsluta?");
+            Long id = input.nextLong();
+//            Rental rental = rentalRepository.getRentalById(id);
+//            if (rental != null) {
+//                System.out.println("Hittar uthyrningen: " + rental.getId() + ", "
+//                        + rental.getMember() + ", " + rental.getReturnDate());
+            rentalRepository.getRentalById(id);
+                //uppdate rental till "Avslutad med dagens datum i databasen
+                //fordonet ska bli tillgängligt att hyra igen
+                System.out.println("Bokning avslutad.");
         }
-        */
-    /*
-   public String available(){
-       String text = "";
-       StringBuilder textBuilder = new StringBuilder();
-       for(Car vehicle: inventory.getVehicleList()){
-           if(vehicle.isLoanable()){
-               textBuilder.append(vehicle.getBrand() + ", ").append(vehicle.getModel()).append("\n");
-           }
-           text = textBuilder.toString();
-       } return text;
-   }
-   public void bookVehicle(Vehicle vehicle, Member searchedNamed, TextField booking, TextField days,
-                           Label search, Label discountLabel, TextField historyText, Label saved) {
-       Rental rental = new Rental();
-       rental.setMember(searchedNamed);
-
-       booking.getText();
-       if (vehicle == null || !vehicle.isLoanable()) {
-           search.setText("Fordonet är inte tillgängligt att låna just nu");
-       } else {
-           vehicle.setLoanable(false);
-           rental.setVehicle(vehicle);
-           booking.clear();
-
-           String day = String.valueOf((days.getText()));
-           rental.setRentalDays(Integer.parseInt(day));
-           int amount = cost(Integer.parseInt(days.getText()));
-           search.setText("Kostnaden blir innan eventuell rabatt " + amount + " kr.");
-           rental.setCost(amount);
-
-           double discount = getDiscountedCost(rental, discountLabel);
-           rental.setCost(discount);
-           rentals.add(rental);
-
-           searchedNamed.setHistory(historyText.getText());
-           saved.setText("Bokning sparad");
-       }
-   } */
-    public LocalDate dateFormat(String rentalDate) {
+    public LocalDate rentalDate(String rentalDate) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate bookingDate;
         try {
             bookingDate = LocalDate.parse(rentalDate, formatter);
-            //bookingDate = localDate.plusDays(rentalDays);
             System.out.println("Påbörjar uthyrningen datumet " + bookingDate);
         }
         catch (Exception e) {
@@ -161,32 +122,33 @@ public class RentalService {
         return returnD;
     }
     public long dateDiff(LocalDate rentalDate, LocalDate returnDate) {
-       // LocalDate date1 = LocalDate.of(LocalDate.parse(rentalDate));
-       // LocalDate date2 = LocalDate.of(returnDate);
-        //long daysBetween = ChronoUnit.DAYS.between(date1, date2);
-        long daysBetween = rentalDate.until(returnDate, ChronoUnit.DAYS);
-        return daysBetween;
+        return rentalDate.until(returnDate, ChronoUnit.DAYS);
     }
     //Anropa repo från RentalService, i repo ska jag hämta en member med en sql query, returnera member hit
     //hämta från databasen
     public void rentCar(String car, Long rentalObjectId,
-                          LocalDate rentalDate, LocalDate returnDate, BigDecimal cost, Long memberId) {
+                          LocalDate rentalDate, LocalDate returnDate, BigDecimal cost
+            , Member member) {
         //hitta rentalobjectId från databasen, kolla om det är false
         //när rental redan är sparad, kolla i rental vad den är kopplad till i db
         //kolla med sql query vad det är för rentalobjectid på car/bike
         //behöver bara veta vilken typ och vilket id, så sparar man en rental
         Optional<Car> objectId = carRepository.findById(rentalObjectId);
-        Member member = memberRepository.searchId(memberId);
         Objects.requireNonNull("Rental får inte vara tomt");
         if (CAR == null) {
             throw new DoubleBookingException("Bilen går inte att låna");
         }
-        if (memberId == null) {
-            throw new MemberNotFoundException("Hittar inte medlem");
-        }
         RENTALTYPE carA = RENTALTYPE.valueOf(String.valueOf(car));
 
         if (carA == CAR) {
+            Rental rental = new Rental(rentalObjectId, rentalDate, returnDate, cost, carA, member);
+            rentalRepository.save(rental);
+        }
+        if (carA == BIKE) {
+            Rental rental = new Rental(rentalObjectId, rentalDate, returnDate, cost, carA, member);
+            rentalRepository.save(rental);
+        }
+        if (carA == CARAVAN) {
             Rental rental = new Rental(rentalObjectId, rentalDate, returnDate, cost, carA, member);
             rentalRepository.save(rental);
         }

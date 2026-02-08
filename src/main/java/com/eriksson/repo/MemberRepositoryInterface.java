@@ -12,4 +12,5 @@ public interface MemberRepositoryInterface {
     List<Member> getAllMembers();
     Optional<Member> searchEmail(String email);
     Member searchId(Long id);
+    void updateName (String firstName, String lastName, Long id);
 }

@@ -27,6 +27,10 @@ class MemberServiceTest {
 
 
     }
+    @Test
+    void saveMember() {
+
+    }
 
     @Test
     void getAllMembers() {

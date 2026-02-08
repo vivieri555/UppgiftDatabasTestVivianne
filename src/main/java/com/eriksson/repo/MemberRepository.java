@@ -2,7 +2,6 @@ package com.eriksson.repo;
 
 import com.eriksson.entity.Member;
 import com.eriksson.exception.MemberNotFoundException;
-import com.eriksson.service.MemberService;
 import com.eriksson.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -14,7 +13,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Scanner;
 
 //spara, hämta och söka data
 //Hur kan jag söka i databasen? Select from, villkor på vad som ska vara uppfyllt Where
@@ -52,7 +50,6 @@ public class MemberRepository implements MemberRepositoryInterface {
 
     @Override
     public List<Member> getAllMembers() {
-        //hämta medlemmar från databasen
         try (Session session = sessionFactory.openSession()) {
             String sql = "SELECT * FROM member";
             {
@@ -69,45 +66,48 @@ public class MemberRepository implements MemberRepositoryInterface {
 
     @Override
     public Member searchId(Long id) {
-        String sql = """
-                SELECT id FROM member WHERE id = ? """;
         try (Session session = sessionFactory.openSession()) {
-            Member result = (Member) session.createNativeQuery(sql)
-                .setParameter(1, id)
-                    .getSingleResult();
+            Member result = session.get(Member.class, id);
             return result;
+        } catch (Exception ex) {
+            throw new MemberNotFoundException("Medlemmen hittades inte");
         }
     }
 
     @Override
     public Optional<Member> searchEmail(String email) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery("from Member c where c.email = :email", Member.class)
+            return session.createQuery("from Member m where m.email = :email", Member.class)
                     .setParameter("email", email)
                     .uniqueResultOptional();
+        } catch(Exception ex) {
+            throw new MemberNotFoundException("Email hittades inte");
+        }
+    }
+    public String updateName(String firstName) {
+        String sql = """
+                SELECT id, firstName, lastName FROM member WHERE firstName = ? """;
+        try (Connection c = Database.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, firstName);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return null;
+
+                return "Customer{id=%d, name='%s', email='%s'}"
+                        .formatted(rs.getLong("id"),
+                                rs.getString("name"),
+                                rs.getString("email"));
+            }
+        } catch (SQLException e) {
+            throw new MemberNotFoundException("Hittade ingen medlem");
+        }
+    }
+    public void updateName (String firstName, String lastName, Long id) {
+        try (Session session = sessionFactory.openSession()) {
+            Member member = session.get(Member.class, id);
+            member.setFirstName(firstName);
+            member.setLastName(lastName);
+            session.merge(member);
         }
     }
 }
-/*
-
-String sql = "SELECT id, name, email FROM customer WHERE email = ?";
-
-        try (
-Connection con = Database.getConnection();
-PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setString(1, email);
-            try (
-ResultSet rs = ps.executeQuery()) {
-        if (!rs.next()) return null;
-
-        return "Customer{id=%d, name='%s', email='%s'}"
-        .formatted(rs.getLong("id"),
-                                rs.getString("name"),
-                                rs.getString("email"));
-        }
-
-        } catch (
-SQLException e) {
-        throw new RuntimeException(e);
-        } */
-

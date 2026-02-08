@@ -76,4 +76,19 @@ protected Rental() {}
     public long getRentalObjectId() {
         return rentalObjectId;
     }
+
+    public void setReturnDate(LocalDate returnDate) { this.returnDate = returnDate; }
+
+    @Override
+    public String toString() {
+        return "Rental{" +
+                "id=" + id +
+                ", rentalObjectId=" + rentalObjectId +
+                ", rentalDate=" + rentalDate +
+                ", returnDate=" + returnDate +
+                ", cost=" + cost +
+                ", rentalType=" + rentalType +
+                ", member=" + member +
+                '}';
+    }
 }
