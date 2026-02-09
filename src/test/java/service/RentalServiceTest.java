@@ -5,14 +5,11 @@ import com.eriksson.entity.Rental;
 import com.eriksson.repo.*;
 import com.eriksson.service.RentalService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
-import static com.eriksson.enums.RENTALTYPE.CAR;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -25,10 +22,6 @@ class RentalServiceTest {
     private BikeRepositoryInterface bikeRepo;
     private CaravanRepositoryInterface caravanRepo;
 
-//    Minst 6 enhetstester
-// Testar service-lagret
-// Repositories mockas med Mockito
-// Ingen Hibernate-kod i dessa tester
 
     @BeforeEach
     void setUp() {
@@ -50,12 +43,12 @@ class RentalServiceTest {
         assertEquals(2, result, "Bör vara 2 dagar mellan datumen");
     }
 
-    @Test
-    void rentCar() {
-       // Member member = new Member()
-        Rental rental = mock(Rental.class);
-
-    }
+//    @Test
+//    void rentCar() {
+//       // Member member = new Member()
+//        Rental rental = mock(Rental.class);
+//
+//    }
 
     @Test
     void cost_whenPremiumMember_shouldGetDiscount() {

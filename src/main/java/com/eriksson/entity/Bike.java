@@ -13,17 +13,13 @@ public class Bike {
     @Column(name = "model", nullable = false, length = 50)
     private String model;
 
-    @Column(name = "loanable")
-    private boolean loanable;
-
 @Column(length = 20)
     private String gears;
 
 protected Bike() {}
 
-    public Bike(String model, boolean loanable, String gears) {
+    public Bike(String model, String gears) {
     this.model = model;
-    this.loanable = loanable;
     this.gears = gears;
     }
 
@@ -33,10 +29,6 @@ protected Bike() {}
 
     public String getModel() {
         return model;
-    }
-
-    public boolean isLoanable() {
-        return loanable;
     }
 
     public String getGears() {

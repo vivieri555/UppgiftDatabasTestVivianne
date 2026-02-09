@@ -1,17 +1,14 @@
 package com.eriksson.repo;
 
-import com.eriksson.entity.Member;
 import com.eriksson.entity.Rental;
+import com.eriksson.enums.RENTALTYPE;
 import com.eriksson.exception.InvalidIdException;
-import com.eriksson.exception.MemberNotFoundException;
-import jakarta.persistence.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 public class RentalRepository implements RentalRepositoryInterface {
@@ -32,82 +29,65 @@ public class RentalRepository implements RentalRepositoryInterface {
             tx.commit();
         }
     }
-
     @Override
-    public List<String> getAllRentals() {
-        String sql = "SELECT id, rentalType FROM Rental";
+    public List<Rental> getAllRentals() {
+        try (Session session = sessionFactory.openSession()) {
+            String sql = "SELECT * FROM Rental";
 
-        try (Connection c = Database.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery(sql)) {
-            List<String> rentals = new ArrayList<>();
-            while (rs.next()) {
-                Long id = rs.getLong("id");
-                String rentalType = rs.getString("rentalType");
-                rentals.add("Rental{id=%d, rentalType=%s'}".formatted(id, rentalType));
+            return session.createNativeQuery(sql, Rental.class).getResultList();
+
+                } catch (Exception ex) {
+                    throw ex;
             }
-            return rentals;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
-
-    @Override
+@Override
     public Rental getRentalById(Long id) {
-      //  String sql = "UPDATE Rental SET returnDate = ? WHERE id = ?";
         try (Session session = sessionFactory.openSession())
         {
             Transaction tx = session.beginTransaction();
-
-            // 1. Hämta entiteten (t.ex. User-klass mappad med @Entity)
             Rental rental = session.get(Rental.class, 1L);
-
-            // 2. Ändra värden via setters
             if (rental != null) {
                 rental.setReturnDate(LocalDate.now());
-                // 3. Uppdatera (valfritt om du är inom en transaction,
-                // då Hibernate automatiskt sparar ändringar vid commit)
+
                 session.merge(rental);
             }
-
-            tx.commit(); // Här körs SQL UPDATE
+            tx.commit();
             if (id == null) {
                 throw new InvalidIdException("Hittar ingen uthyrning med detta id");
             }
             return rental;
         }
     }
+    //Kan inte hyra om större än noll
+    public Boolean isVehicleRented(RENTALTYPE rentalType, long rentalObjectId) {
+        String sql = "SELECT rentalType, rentalObjectId " +
+                "FROM Rental WHERE rentalType = ? " +
+                "AND  rentalObjectId = ? AND returnDate > now() AND rentalDate < now()";
+        try (Connection c = Database.getConnection();
+        PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, rentalType.ordinal());
+            ps.setLong(2, rentalObjectId);
 
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        }
+        catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public void terminateRental(Long id) {
         String sql = """
-                UPDATE rental SET returnDate = ? rental WHERE id = ? """;
+                UPDATE rental SET returnDate = ? WHERE id = ? """;
         try (Connection c = Database.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setLong(1, id);
 
                 ps.setDate(1, Date.valueOf(LocalDate.now()));
                 ps.setLong(2, id);
-            int rowsAffected = ps.executeUpdate();
-            System.out.println(rowsAffected + " rad(er) uppdaterad(e).");
+                ps.executeUpdate();
+            System.out.println("Avslutat uthyrning");
 
         } catch (SQLException e) {
             throw new InvalidIdException("Finns ingen uthyrning med detta id");
         }
     }
 }
-
-/**
- * BookingRepositoryImpl
- *
- * Hibernate-baserad implementation av BookingRepository.
- *
- * Ansvar:
- * - Spara bokningar i databasen
- * - Kontrollera om en plats redan är bokad
- * - Hämta bokningar via id
- *
- * Pedagogiskt:
- * - Detta är DAL-lagret (Data Access Layer)
- * - Innehåller ENBART databaslogik
- * - Ingen affärslogik (den ligger i service-lagret)
- */

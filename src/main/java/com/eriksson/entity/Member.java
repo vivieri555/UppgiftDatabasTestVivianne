@@ -8,25 +8,24 @@ import java.util.List;
 @Entity
 @Table(name = "member")
 public class Member {
-    //Ev ta bort alla setters om de inte behövs
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "firstName", nullable = false, length = 25)
+    @Column(nullable = false, length = 25)
     private String firstName;
 
-    @Column(name = "lastName", nullable = false, length = 25)
+    @Column(nullable = false, length = 25)
     private String lastName;
 
     @Column(nullable = false, unique = true, length = 50)
     private String email;
 
-    @Column(name = "status", length = 15)
+    @Column(length = 15)
     private String status;
 
-    @Column(name = "history")
+    @Column()
     private String history;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -76,12 +75,12 @@ public String getHistory() { return history; }
     @Override
     public String toString() {
         return "Member{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
-                ", status='" + status + '\'' +
-                ", history='" + history + '\'' +
+                "id:" + id +
+                "\nfirstName:'" + firstName + '\'' +
+                "\nlastName:'" + lastName + '\'' +
+                "\nemail:'" + email + '\'' +
+                "\nstatus:'" + status + '\'' +
+                "\nhistory:'" + history + '\'' +
                 '}';
     }
 }

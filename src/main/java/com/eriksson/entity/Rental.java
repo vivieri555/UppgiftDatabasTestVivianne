@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Optional;
 
 @Entity
 @Table(name = "rental")
@@ -19,13 +18,13 @@ public class Rental {
     @Column(nullable = false)
     private Long rentalObjectId;
 
-    @Column(name = "rentalDate", nullable = false)
+    @Column(nullable = false)
     private LocalDate rentalDate;
 
     @Column(nullable = false)
     private LocalDate returnDate;
 
-    @Column(name = "cost", nullable = false)
+    @Column(nullable = false)
     private BigDecimal cost;
 
     @Column(nullable = false)
@@ -42,7 +41,8 @@ public class Rental {
 
 protected Rental() {}
 
-    public Rental(Long rentalObjectId, LocalDate rentalDate, LocalDate returnDate, BigDecimal cost, RENTALTYPE rentalType, Member member) {
+    public Rental(Long rentalObjectId, LocalDate rentalDate, LocalDate returnDate,
+                  BigDecimal cost, RENTALTYPE rentalType, Member member) {
     this.rentalObjectId = rentalObjectId;
     this.rentalDate = rentalDate;
     this.returnDate = returnDate;

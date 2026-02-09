@@ -3,6 +3,7 @@ package com.eriksson.service;
 import com.eriksson.entity.Member;
 import com.eriksson.exception.InvalidEmailException;
 import com.eriksson.exception.InvalidNameException;
+import com.eriksson.exception.InvalidStatusException;
 import com.eriksson.repo.MemberRepository;
 import com.eriksson.repo.MemberRepositoryInterface;
 
@@ -26,7 +27,9 @@ public class MemberService {
         if(email == null || email.isBlank()) {
             throw new InvalidEmailException("fyll i email");
         }
-
+        if (status == null || status.isBlank()) {
+            throw new InvalidStatusException("fyll i status");
+        }
         Member member = new Member(firstName.trim(), lastName.trim(), email.trim(),  status.trim(), history.trim());
         memberRepository.save(member);
     }
@@ -41,13 +44,13 @@ public class MemberService {
         while (isRunning) {
             System.out.println("******** Hantera Medlemmar *********");
             System.out.println("Tryck 1 för att lägga till ny medlem");
-            System.out.println("Tryck 2 för att ändra på medlem");
+            System.out.println("Tryck 2 för att ändra för- eller efternamn på medlem");
             System.out.println("Tryck 3 för att lista alla medlemmar");
             System.out.println("Tryck 4 för att söka medlem via email");
             System.out.println("Tryck 5 för att radera en medlem");
             System.out.println("Tryck 9 för att avsluta medlemsmenyn");
 
-        int answer = 0;
+        int answer;
         try {
             answer = input.nextInt();
         }
@@ -68,12 +71,21 @@ public class MemberService {
                 String status = input.nextLine();
                 System.out.println("Fyll i eventuell historik:");
                 String history = input.nextLine();
-
                 createMember(firstName, lastName, email, status, history);
+                System.out.println("Medlemmen sparad");
                 break;
             case 2:
-                //Ändra på medlem Update
-              //  memberRepository.updateName();
+                input.nextLine();
+                System.out.println("Vilket id har medlemmen du vill ändra på?");
+                Long id = input.nextLong();
+                input.nextLine();
+                System.out.println("Vilket förnamn ska medlemmen ha:");
+                String firstN = input.nextLine();
+                System.out.println("Vilket efternamn ska medlemmen ha:");
+                String lastN = input.nextLine();
+
+                String update = memberRepository.updateName(firstN, lastN, id);
+                System.out.println(update + "Medlem uppdaterad");
                 break;
             case 3:
                 for(Member member : getAllMembers())

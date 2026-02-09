@@ -18,7 +18,6 @@ public class Main {
     public static void main(String[] args) {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
-        //repo
 
         MemberRepositoryInterface memberRepo = new MemberRepository(sessionFactory);
         RentalRepositoryInterface rentalRepo = new RentalRepository(sessionFactory);
@@ -26,7 +25,6 @@ public class Main {
         BikeRepositoryInterface bikeRepo = new BikeRepository(sessionFactory);
         CaravanRepositoryInterface caravanRepo = new CaravanRepository(sessionFactory);
 
-        //Service
         MemberService memberService = new MemberService(memberRepo);
         RentalService rentalService = new RentalService(rentalRepo, carRepo, bikeRepo, caravanRepo, memberRepo);
 
@@ -42,8 +40,7 @@ public class Main {
             System.out.println("För att skapa ny husvagn tryck 4");
             System.out.println("För att skapa ny bokning tryck 5");
             System.out.println("För att avsluta uthyrning tryck 6");
-            System.out.println("Tryck 7 för se samlade intäkter");
-            System.out.println("8 lista rentals");
+            System.out.println("Tryck 7 för att lista rentals");
             System.out.println("Avsluta tryck 9");
             int answer = 0;
             try {
@@ -65,35 +62,27 @@ public class Main {
                     String carModel = input.nextLine();
                     System.out.println("Vilken växellåda har bilen:");
                     String carGearbox = input.nextLine();
-                    System.out.println("Lånbar true eller false:");
-                    Boolean carLoanable = input.nextBoolean();
-                    rentalService.createCar(carBrand, carModel, carGearbox, carLoanable);
-                    //Spara in bilen
+                    rentalService.createCar(carBrand, carModel, carGearbox);
                     break;
                 case 3:
                     input.nextLine();
                     System.out.println("Vad har cykeln för modell:");
                     String bikeModel = input.nextLine();
-                    System.out.println("Lånbar true annars skriv false:");
-                    Boolean bikeLoanable = input.nextBoolean();
                     input.nextLine();
                     System.out.println("Hur många växlar har cykeln:");
                     String bikeGears = input.nextLine();
-                    rentalService.createBike(bikeModel, bikeLoanable, bikeGears);
+                    rentalService.createBike(bikeModel, bikeGears);
                     break;
                 case 4:
                     input.nextLine();
                     System.out.println("Fyll i modell på husvagnen:");
                     String caravanModel = input.nextLine();
-                    System.out.println("Är husvagnen lånbar true eller false:");
-                    Boolean caravanLoanable = input.nextBoolean();
                     input.nextLine();
                     System.out.println("Är husvagnen Dubbalaxlad eller Enkelaxlad:");
                     String caravanAxles = input.nextLine();
-                    rentalService.createCaravan(caravanModel, caravanLoanable, caravanAxles);
+                    rentalService.createCaravan(caravanModel, caravanAxles);
                     break;
                 case 5:
-                    //Hämta medlemmar
                     for(Member member : memberService.getAllMembers())
                     {
                         System.out.println(member.getFirstName() + ", id: " + member.getId());
@@ -107,25 +96,29 @@ public class Main {
                     System.out.println("Vilket Rentalobject id har fordonet du vill hyra:");
                     Long objectId = input.nextLong();
                     input.nextLine();
-                    System.out.println("Från vilket datum vill du boka? Ange åååå-mm-dd");
-                    String date = input.nextLine();
+                    System.out.println("Bokningen blir från idag");
                     System.out.println("Till vilket datum önskar du boka? Ange åååå-mm-dd");
                     String returnD = input.nextLine();
-                    LocalDate rentalDate = rentalService.rentalDate(date);
+                    LocalDate rentalDate = LocalDate.now();
                     LocalDate returnDate = rentalService.returnDate(returnD);
                     long dateDiff = rentalService.dateDiff(rentalDate, returnDate);
                     Member member = memberRepo.searchId((id));
                     BigDecimal amount = rentalService.cost(member, (int)dateDiff);
                     System.out.println("Kostnaden blir uträknat: " + amount);
-
-                    rentalService.rentCar(car, objectId, rentalDate, returnDate, amount, member);
-
+                    try {
+                        rentalService.rentVehicle(car, objectId, rentalDate, returnDate, amount, member);
+                    } catch (Exception e) {
+                        System.out.println("Det gick inte att boka fordonet. " + e.getMessage());
+                    }
+                    break;
                 case 6:
                     rentalService.terminateRental();
                     break;
-                case 8:
-                    for(Object rental: rentalRepo.getAllRentals()) {
-                        System.out.println(rental.toString());
+                case 7:
+                    for(Rental rental: rentalRepo.getAllRentals()) {
+                        System.out.println("Rental Id: "+ rental.getId() + ", " + rental.getRentalType() +
+                                ", Uthyrningsdatum: " + rental.getRentalDate() + ", Återlämningsdatum: "
+                                +rental.getReturnDate() + ", objekt id:" + rental.getRentalObjectId());
                     }
                     break;
                 case 9:

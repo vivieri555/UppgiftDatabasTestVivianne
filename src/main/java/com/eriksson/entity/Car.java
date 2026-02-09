@@ -19,16 +19,12 @@ public class Car {
     @Column(length = 30)
     private String gearbox;
 
-    @Column(nullable = false)
-    private Boolean loanable;
-
     protected Car() {}
 
-    public Car(String brand, String model, String gearbox, Boolean loanable) {
+    public Car(String brand, String model, String gearbox) {
         this.brand = brand;
         this.model = model;
         this.gearbox = gearbox;
-        this.loanable = loanable;
     }
 
     public Long getId() { return id; }
@@ -38,7 +34,4 @@ public class Car {
     public String getModel() { return model; }
 
     public String getGearbox() { return gearbox; }
-
-    public Boolean isLoanable() { return loanable; }
-
 }

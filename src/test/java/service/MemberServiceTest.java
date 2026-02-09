@@ -18,7 +18,6 @@ import static org.mockito.Mockito.*;
 
 class MemberServiceTest {
 
-    //Enhetstester här 6 st minst i memberService/ RentalService
     private MemberRepositoryInterface memberRepo;
     private MemberService memberService;
 
@@ -45,7 +44,7 @@ class MemberServiceTest {
         members.add(member1);
         members.add(member2);
         members.add(member3);
-        
+
         when(memberRepo.getAllMembers()).thenReturn(members);
         List<Member> result = memberService.getAllMembers();
 
