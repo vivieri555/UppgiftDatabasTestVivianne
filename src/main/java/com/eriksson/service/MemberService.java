@@ -34,6 +34,7 @@ public class MemberService {
     public List<Member> getAllMembers() {
         return memberRepository.getAllMembers();
     }
+
     public void membersMenu() {
         boolean isRunning = true;
         Scanner input = new Scanner(System.in);

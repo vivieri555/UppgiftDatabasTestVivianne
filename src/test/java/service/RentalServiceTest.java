@@ -38,9 +38,9 @@ class RentalServiceTest {
     }
 
     @Test
-    void dateFormat() {
-        rentalService.rentalDate("2026-01-01");
-        verify(rentalRepo, times(1)).save(any());
+    void dateFormat_whenSaveDateFormat() {
+        LocalDate result = rentalService.rentalDate("2026-01-01");
+        assertEquals(LocalDate.parse("2026-01-01"), result);
     }
     @Test
     void dateDiff() {
@@ -63,6 +63,13 @@ class RentalServiceTest {
                 , "vivi@email", "Premium", "h");
         BigDecimal result = rentalService.cost(member, 2);
         assertEquals(BigDecimal.valueOf(2000.5), result);
+    }
+    @Test
+    void cost_whenStandardMember_shouldNotGetDiscount() {
+        Member member = new Member("Vivianne", "Eriksson"
+                , "vivi@email", "Standard", "h");
+        BigDecimal result = rentalService.cost(member, 2);
+        assertEquals(BigDecimal.valueOf(2101.0), result);
     }
     private static void setId(Object entity, Long id) {
         try {
